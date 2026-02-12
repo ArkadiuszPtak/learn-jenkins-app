@@ -1,0 +1,22 @@
+FROM amazonlinux:2
+
+# Podstawowe narzędzia + tar i gzip
+RUN yum install -y jq python3 unzip curl bash less groff tar gzip \
+    && yum clean all
+
+# Docker CLI (host socket będzie montowany)
+RUN curl -fsSL https://download.docker.com/linux/static/stable/x86_64/docker-24.0.5.tgz \
+    | tar -xzC /usr/local/bin --strip-components=1 docker/docker \
+    && chmod +x /usr/local/bin/docker
+
+# AWS CLI v2
+RUN curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" \
+    && unzip awscliv2.zip \
+    && ./aws/install \
+    && rm -rf aws awscliv2.zip
+
+ENV PATH="/usr/local/aws-cli/v2/current/bin:${PATH}"
+
+# test
+RUN aws --version
+RUN docker --version
